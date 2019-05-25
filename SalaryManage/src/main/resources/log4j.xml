@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Log4j2配置文件-->
+<configuration status="WARN">
+    <appenders>
+        <Console name ="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="%d{HH:mm:ss.SSS} {%t} %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <RollingFile name="WebFileAppender" fileName="../logs/application.log"
+                     filePattern="../logs/pxx-%d{MM-dd-yyyy}-%i.log">
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} {%t} %X{id} %X{username} %-5level
+                %c{36} %l:%msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+            </Policies>
+            <DefaultRolloverStrategy min="1" max="4" />
+        </RollingFile>
+    </appenders>
+    <loggers>
+        <root level="warn">
+            <appender-ref ref="Console" />
+            <appender-ref ref="WebFileAppender" />
+        </root>
+        <logger name="com.zzy.ssm" level="debug" />
+        <logger name="org.apache" level="info" />
+        <logger name="org.springframework" level="info" />
+    </loggers>
+</configuration>

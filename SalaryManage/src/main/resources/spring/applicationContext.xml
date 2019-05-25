@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" 
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd 
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+    
+
+    <!--扫描数据库配置文件-->
+    <context:property-placeholder location="classpath:db.properties"></context:property-placeholder>
+
+    <context:component-scan base-package="com.salary.service"></context:component-scan>
+
+
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="dataSource">
+
+        <property name="driverClass" value="${jdbc.driver}"></property>
+
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+
+        <property name="user" value="${jdbc.username}"></property>
+
+        <property name="password" value="${jdbc.password}"></property>
+
+        <property name="initialPoolSize" value="20"></property>
+
+        <property name="maxPoolSize" value="100"></property>
+
+        <property name="minPoolSize" value="30"></property>
+    </bean>
+
+    <!--配置myBatis Plus-->
+    <bean class="com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean" id="sqlSessionFactory">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="typeAliasesPackage" value="com.salary.bean"></property>
+        <property name="mapperLocations" value="classpath:mapper/*Mapper.xml"></property>
+        <!--此是mybatis的配置文件所在地-->
+        <property name="configLocation" value="classpath:mybatis.xml"></property>
+    </bean>
+
+    <!--配置扫描mapperl路径的接口-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" id="mapperScannerConfigurer">
+        <property name="basePackage" value="com.salary.mapper"></property>
+    </bean>
+
+    <context:component-scan base-package="com.salary.service"></context:component-scan>
+
+    <!--配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+
+    <tx:advice id="transactionInterceptor" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!-- 传播行为 -->
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="create*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+            <tx:method name="select*" propagation="SUPPORTS" read-only="true"/>
+            <tx:method name="get*" propagation="SUPPORTS" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--编程式面向切面的事务-->
+    <aop:config>
+        <aop:pointcut id="poincut" expression="execution(* com.salary.service..*.*(..))"></aop:pointcut>
+
+        <aop:advisor advice-ref="transactionInterceptor" pointcut-ref="poincut"></aop:advisor>
+
+    </aop:config>
+    <aop:aspectj-autoproxy  proxy-target-class="true"/>
+
+</beans>
